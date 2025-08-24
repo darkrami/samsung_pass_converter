@@ -1,21 +1,12 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, scrolledtext, messagebox
+from tkinter import ttk, filedialog, messagebox
 import os
 import threading
-import queue
 import sys
 import darkdetect
 import sv_ttk
 
 from convert import run_conversion
-
-# A custom stream object to redirect stdout
-class QueueIO(queue.Queue):
-    def write(self, msg):
-        self.put(msg)
-    def flush(self):
-        # This is needed for stdout redirection
-        pass
 
 class ConverterApp(tk.Tk):
     def __init__(self):
@@ -28,13 +19,9 @@ class ConverterApp(tk.Tk):
             sv_ttk.set_theme("light")
 
         self.title("Samsung Pass Converter")
-        self.geometry("600x450")
+        self.geometry("600x280") # Adjusted height for the new label
 
         self.create_widgets()
-
-        # Queue for logging from other threads
-        self.log_queue = QueueIO()
-        self.process_log_queue()
 
     def create_widgets(self):
         # Theme toggle button
@@ -79,13 +66,10 @@ class ConverterApp(tk.Tk):
         self.convert_button = ttk.Button(self, text="Convert", command=self.start_conversion)
         self.convert_button.pack(pady=10)
 
-        # Status/Log area
-        log_frame = ttk.Frame(self, padding="10")
-        log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-        ttk.Label(log_frame, text="Log:").pack(anchor=tk.W)
-        self.log_area = scrolledtext.ScrolledText(log_frame, height=10, wrap=tk.WORD)
-        self.log_area.pack(fill=tk.BOTH, expand=True)
-        self.log_area.configure(state='disabled')
+        # Status Label
+        self.status_var = tk.StringVar()
+        self.status_label = ttk.Label(self, textvariable=self.status_var, font=("Segoe UI", 10))
+        self.status_label.pack(pady=5)
 
     def browse_file(self):
         filepath = filedialog.askopenfilename(
@@ -103,23 +87,25 @@ class ConverterApp(tk.Tk):
             self.output_dir_var.set(dirpath)
 
     def start_conversion(self):
+        # Clear previous status
+        self.status_var.set("")
+
         file_path = self.file_path_var.get()
         password = self.password_var.get()
         output_dir = self.output_dir_var.get()
         output_filename = self.output_filename_var.get()
 
         if not file_path or not os.path.exists(file_path):
-            messagebox.showerror("Error", "Please select a valid input file.")
+            self.show_status_message("Error: Please select a valid input file.", is_error=True)
             return
         if not password:
-            messagebox.showerror("Error", "Please enter the password.")
+            self.show_status_message("Error: Please enter the password.", is_error=True)
             return
         if not output_dir or not os.path.isdir(output_dir):
-            messagebox.showerror("Error", "Please select a valid output directory.")
+            self.show_status_message("Error: Please select a valid output directory.", is_error=True)
             return
 
         self.convert_button.config(state="disabled")
-        self.log_message("Starting conversion...\n")
 
         self.conversion_thread = threading.Thread(
             target=self.run_conversion_thread,
@@ -129,38 +115,31 @@ class ConverterApp(tk.Tk):
         self.conversion_thread.start()
 
     def run_conversion_thread(self, file_path, password, output_dir, output_filename):
-        original_stdout = sys.stdout
-        sys.stdout = self.log_queue
-
         try:
+            # We don't need the output from run_conversion anymore, just whether it succeeded.
+            # The print statements from convert.py will still go to the console.
             run_conversion(file_path, password, output_dir, output_filename)
-            self.log_queue.put("\n--- Conversion successful! ---\n")
-        except Exception as e:
-            self.log_queue.put(f"\n--- An error occurred: {e} ---\n")
-            import traceback
-            self.log_queue.put(traceback.format_exc())
-        finally:
-            sys.stdout = original_stdout
-            self.after(0, self.on_conversion_complete)
+            self.after(0, self.on_conversion_complete, True)
+        except Exception:
+            self.after(0, self.on_conversion_complete, False)
 
-    def on_conversion_complete(self):
+    def on_conversion_complete(self, success):
         self.convert_button.config(state="normal")
-        messagebox.showinfo("Complete", "Conversion process finished.")
+        if success:
+            self.show_status_message("Success!")
+        else:
+            self.show_status_message("Something went wrong :(", is_error=True)
 
-    def process_log_queue(self):
-        try:
-            while True:
-                msg = self.log_queue.get_nowait()
-                self.log_message(msg)
-        except queue.Empty:
-            pass
-        self.after(100, self.process_log_queue)
+    def show_status_message(self, message, is_error=False):
+        self.status_var.set(message)
+        if is_error:
+            self.status_label.config(foreground="red")
+        else:
+            # Use the default text color of the theme
+            self.status_label.config(foreground="")
 
-    def log_message(self, message):
-        self.log_area.configure(state='normal')
-        self.log_area.insert(tk.END, message)
-        self.log_area.see(tk.END)
-        self.log_area.configure(state='disabled')
+        # Clear the message after 5 seconds
+        self.after(5000, lambda: self.status_var.set(""))
 
 
 if __name__ == "__main__":
