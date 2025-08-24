@@ -16,7 +16,7 @@ This script decrypts Samsung Pass `.spass` export files and converts them into a
 Install dependencies:
 
 ```sh
-pip install -r requirements.txt
+pip install cryptography
 ```
 
 ## GUI Application

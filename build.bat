@@ -31,10 +31,10 @@ echo Activating virtual environment...
 call venv\Scripts\activate.bat
 
 echo.
-echo Installing dependencies...
-pip install -r requirements.txt
+echo Installing cryptography...
+pip install -r cryptography
 if %errorlevel% neq 0 (
-    echo Error: Failed to install dependencies from requirements.txt.
+    echo Error: Failed to install cryptography
     pause
     exit /b 1
 )
