@@ -35,12 +35,14 @@ python gui.py
 
 ### GUI Features
 
+*   **Modern UI:** A clean user interface with a modern look and feel.
+*   **Icon Buttons:** Clear icons for all actions.
+*   **Dark Mode:** Automatically detects your system's theme and includes a button (☀️/🌙) to toggle manually.
 *   **File Selection:** Easily browse for your `.spass` export file.
 *   **Password Entry:** A secure field to enter your decryption password.
 *   **Output Directory:** Choose where you want to save the converted files.
 *   **Custom Filename:** Optionally specify a custom name for the output CSV file. Defaults to `spass.csv`.
-*   **Dark Mode:** Automatically detects your system's theme and includes a button to toggle manually.
-*   **Real-time Log:** See the progress of the conversion and any errors in real-time.
+*   **Simple Feedback:** Get a clear "Success!" or "Something went wrong :(" message after conversion.
 
 ## Command-Line Usage
 

@@ -11,22 +11,30 @@ from convert import run_conversion
 class ConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.withdraw() # Hide window until setup is complete
 
         # Set theme before creating widgets
         if darkdetect.isDark():
+            self.dark_mode = True
             sv_ttk.set_theme("dark")
         else:
+            self.dark_mode = False
             sv_ttk.set_theme("light")
 
         self.title("Samsung Pass Converter")
-        self.geometry("600x280") # Adjusted height for the new label
+        self.geometry("600x280")
 
         self.create_widgets()
 
+        self.deiconify() # Show window now
+
     def create_widgets(self):
         # Theme toggle button
-        self.theme_button = ttk.Button(self, text="Toggle Theme", command=sv_ttk.toggle_theme)
+        self.theme_button_var = tk.StringVar()
+        self.theme_button = ttk.Button(self, textvariable=self.theme_button_var, command=self.toggle_theme_and_update_icon)
         self.theme_button.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=5)
+        self.update_theme_icon()
+
 
         # Frame for inputs
         input_frame = ttk.Frame(self, padding="10")
@@ -38,7 +46,7 @@ class ConverterApp(tk.Tk):
         self.file_path_var = tk.StringVar()
         self.file_path_entry = ttk.Entry(input_frame, textvariable=self.file_path_var)
         self.file_path_entry.grid(row=0, column=1, sticky=tk.EW, pady=2, padx=5)
-        self.browse_file_button = ttk.Button(input_frame, text="Browse...", command=self.browse_file)
+        self.browse_file_button = ttk.Button(input_frame, text="📁 Browse...", command=self.browse_file)
         self.browse_file_button.grid(row=0, column=2, sticky=tk.W, pady=2)
 
         # Password
@@ -52,7 +60,7 @@ class ConverterApp(tk.Tk):
         self.output_dir_var = tk.StringVar()
         self.output_dir_entry = ttk.Entry(input_frame, textvariable=self.output_dir_var)
         self.output_dir_entry.grid(row=2, column=1, sticky=tk.EW, pady=2, padx=5)
-        self.browse_dir_button = ttk.Button(input_frame, text="Browse...", command=self.browse_dir)
+        self.browse_dir_button = ttk.Button(input_frame, text="📁 Browse...", command=self.browse_dir)
         self.browse_dir_button.grid(row=2, column=2, sticky=tk.W, pady=2)
 
         # Custom output filename
@@ -63,13 +71,24 @@ class ConverterApp(tk.Tk):
         self.output_filename_entry.insert(0, "spass.csv")
 
         # Convert button
-        self.convert_button = ttk.Button(self, text="Convert", command=self.start_conversion)
+        self.convert_button = ttk.Button(self, text="▶️ Convert", command=self.start_conversion)
         self.convert_button.pack(pady=10)
 
         # Status Label
         self.status_var = tk.StringVar()
         self.status_label = ttk.Label(self, textvariable=self.status_var, font=("Segoe UI", 10))
         self.status_label.pack(pady=5)
+
+    def toggle_theme_and_update_icon(self):
+        sv_ttk.toggle_theme()
+        self.dark_mode = not self.dark_mode
+        self.update_theme_icon()
+
+    def update_theme_icon(self):
+        if self.dark_mode:
+            self.theme_button_var.set("☀️")
+        else:
+            self.theme_button_var.set("🌙")
 
     def browse_file(self):
         filepath = filedialog.askopenfilename(
