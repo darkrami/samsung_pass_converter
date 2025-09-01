@@ -102,6 +102,16 @@ If you prefer to run the steps manually, open a Command Prompt and follow these 
 
 6.  **Find the executable:** The `SamsungPassConverter.exe` file will be in the `dist` folder.
 
+### Adding a Custom Application Icon (Optional)
+
+You can give the final `.exe` file a custom icon (like the Samsung Pass icon).
+
+1.  **Get an icon file:** Find a `.png` or `.svg` image for your icon. For WinUI 3 icons, you can browse the [Segoe Fluent Icons list](https://learn.microsoft.com/en-us/windows/apps/design/style/segoe-fluent-icons-font) from Microsoft.
+2.  **Convert to `.ico`:** The build script requires the icon to be in the `.ico` format. You can use a free online tool like [CloudConvert](https://cloudconvert.com/png-to-ico) to convert your image.
+3.  **Save the icon:** Save the converted file as `icon.ico` in the main project folder (the same folder as `build.bat`).
+
+If the `build.bat` script finds the `icon.ico` file, it will automatically use it for the executable.
+
 
 ## Legal Notice
 

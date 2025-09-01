@@ -46,7 +46,14 @@ echo =================================================
 echo This may take a few moments.
 echo.
 
-pyinstaller --onefile --windowed --name "SamsungPassConverter" gui.py
+if exist "icon.ico" (
+    echo Found icon.ico, including it in the build.
+    pyinstaller --onefile --windowed --name "SamsungPassConverter" --icon="icon.ico" gui.py
+) else (
+    echo icon.ico not found, building without a custom icon.
+    pyinstaller --onefile --windowed --name "SamsungPassConverter" gui.py
+)
+
 
 echo.
 echo =================================================

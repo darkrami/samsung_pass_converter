@@ -31,7 +31,9 @@ class ConverterApp(tk.Tk):
     def create_widgets(self):
         # Theme toggle button
         self.theme_button_var = tk.StringVar()
-        self.theme_button = ttk.Button(self, textvariable=self.theme_button_var, command=self.toggle_theme_and_update_icon)
+        self.theme_button = ttk.Button(
+            self, textvariable=self.theme_button_var, command=self.toggle_theme_and_update_icon, width=2
+        )
         self.theme_button.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=5)
         self.update_theme_icon()
 
@@ -86,9 +88,9 @@ class ConverterApp(tk.Tk):
 
     def update_theme_icon(self):
         if self.dark_mode:
-            self.theme_button_var.set("☀️")
+            self.theme_button_var.set("☼") # Sun icon
         else:
-            self.theme_button_var.set("🌙")
+            self.theme_button_var.set("☾") # Moon icon
 
     def browse_file(self):
         filepath = filedialog.askopenfilename(
